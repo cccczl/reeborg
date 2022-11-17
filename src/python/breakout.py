@@ -208,8 +208,6 @@ class Score(GameObject):
             self.score += 10000
         elif info == "lose ball":
             self.score -= 1000
-        else:
-            pass
 
     def draw(self):
         '''Draws the score on the screen, including graphical information about lives'''
@@ -522,12 +520,11 @@ class Game(object):
                 clear_timeout(self.frame_id)
             return False
         elif self.player.lost_life:
+            self.pause = True
             if self.player.lives == 0:
-                self.pause = True
                 self.info.show_game_over()
                 return False
             else:
-                self.pause = True
                 self.player.lost_life = False
                 self.ball = Ball(10, self.display.height-30, dy=-5,
                     send_msg=self.receive_message,
@@ -575,8 +572,7 @@ class Game(object):
 
     def change_fps(self, increment):
         self.fps += increment
-        if self.fps < 1:
-            self.fps = 1
+        self.fps = max(self.fps, 1)
         self.time_between_frames = 1000/self.fps
 
     def handle_keydown_events(self, ev):

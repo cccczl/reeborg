@@ -143,10 +143,7 @@ class Graph:
 
         '''
         _neighbours = self.graph.neighbours(list(node))
-        result = []
-        for node in _neighbours:
-            result.append(tuple(node))
-        return result
+        return [tuple(node) for node in _neighbours]
 
     def cost(self, current, neighbour):
         return self.graph.cost(current, neighbour);

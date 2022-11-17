@@ -2,7 +2,7 @@
 think(0)
 
 def pick_one_row():
-    for i in range(6):
+    for _ in range(6):
         while object_here("carrot"):
             take("carrot")
         move()

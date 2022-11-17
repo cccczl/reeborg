@@ -24,7 +24,7 @@ def print_exc(exc=None):
                 user_traceback = True
     print('\n' + exc.__name__, end='')
     if hasattr(exc, "args") and len(exc.args) > 0:
-        print(': %s' % exc.args[0])
+        print(f': {exc.args[0]}')
     print('\n')
 
 
@@ -290,17 +290,17 @@ class Interpreter():
             py_console.prompt()
             self.status = "main"
         except Exception as e:
-            exc = __BRYTHON__.current_exception  # NOQA
             if hasattr(e, 'reeborg_shouts'):
                 message = RUR.translate(getattr(e, 'reeborg_shouts'))
                 message = message.replace('<code>', '').replace('</code>', '')
-                py_console.append("{}: {}".format(e.__name__, message))  # NOQA
+                py_console.append(f"{e.__name__}: {message}")
             elif hasattr(e, 'reeborg_concludes'):
                 window.console.log("yes, it has attribute reeborg_concludes")
                 message = RUR.translate(getattr(e, 'reeborg_concludes'))
-                py_console.append("{}: {}".format(e.__name__, message)) # NOQA
+                py_console.append(f"{e.__name__}: {message}")
             else:
-                 print_exc(exc)
+                exc = __BRYTHON__.current_exception  # NOQA
+                print_exc(exc)
             py_console.append("\n")
             py_console.prompt()
             self.status = "main"
@@ -327,7 +327,7 @@ class Interpreter():
     def process_code(self, src):
         self.history.append(self.current_line)
         self.current = len(self.history)
-        if self.status == "main" or self.status == "multiline":
+        if self.status in ["main", "multiline"]:
             self.process_statement()  # self.current_line
         elif self.current_line == "":  # end of block
             self.process_block(src)

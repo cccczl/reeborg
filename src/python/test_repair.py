@@ -8,7 +8,7 @@ def test():
     fixed = RepairedRobot()
     leaky_1 = RepairedRobot(5, 5, leaky=True)
 
-    for i in range(4):
+    for _ in range(4):
         leaky_1.move()
         leaky_1.turn_right()
 

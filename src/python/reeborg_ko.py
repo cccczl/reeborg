@@ -41,7 +41,7 @@ def 벽_만들기():   #py:build_wall
     RUR._build_wall_()
 
 
-def 물건을_가지고_있음(물건=미지정): #py:carries_object
+def 물건을_가지고_있음(물건=미지정):    #py:carries_object
     """
     Indicates whether Reeborg carries an object or not.
 
@@ -68,11 +68,7 @@ def 물건을_가지고_있음(물건=미지정): #py:carries_object
     if 물건 is not None:
         return RUR._carries_object_(물건)
     else:
-        ans = RUR._carries_object_()
-        if ans:
-            return dict(ans)
-        else:
-            return 0
+        return dict(ans) if (ans := RUR._carries_object_()) else 0
 
 def 출력_지우기(): #py:clear_print
     """Erase all the text previously written using a call to print()."""
@@ -200,14 +196,8 @@ def 바닥에_물건이_있음(물건=미지정):    #py:object_here
         >>> object_here("banana")
         []
     """
-    if 물건 is not None:
-        ans = RUR._object_here_(물건)
-    else:
-        ans = RUR._object_here_()
-    if ans:
-        return list(ans)    # convert from JS list-like object to proper Python list
-    else:
-        return []
+    ans = RUR._object_here_(물건) if 물건 is not None else RUR._object_here_()
+    return list(ans) if ans else []
 
 
 def 바닥_색칠(색상):   #py:paint_square
@@ -496,7 +486,7 @@ class 사용_로봇(object):  #py:UR
         RUR.add_robot(self.body)
 
     def __str__(self):  #py:UR.__str__
-        location = "({}, {})".format(self.body.x, self.body.y)
+        location = f"({self.body.x}, {self.body.y})"
         if self.body._orientation == RUR.EAST:
             facing = "동쪽을 향함"
         elif self.body._orientation == RUR.WEST:
@@ -506,15 +496,16 @@ class 사용_로봇(object):  #py:UR
         elif self.body._orientation == RUR.SOUTH:
             facing = "남쪽을 향함"
 
-        carries = ''
-        for obj in self.body.objects:
-            if self.body.objects[obj] == 'inf':
-                carries += "\n携带乐无穷多个%s" % obj
-            else:
-                carries += '\n携带了%s个%s' % (self.body.objects[obj], obj)
+        carries = ''.join(
+            "\n携带乐无穷多个%s" % obj
+            if self.body.objects[obj] == 'inf'
+            else '\n携带了%s个%s' % (self.body.objects[obj], obj)
+            for obj in self.body.objects
+        )
+
         if not carries:
             carries = '没有携带物品'
-        return "机器人在座标{}，{}，{}.".format(location, facing, carries)
+        return f"机器人在座标{location}，{facing}，{carries}."
 
     def 목적지에_도착함(self):    #py:UR.at_goal
         """
@@ -532,7 +523,7 @@ class 사용_로봇(object):  #py:UR
         """
         RUR._UR.build_wall_(self.body)
 
-    def 물건을_가지고_있음(self, 물건=미지정):  #py:UR.carries_object
+    def 물건을_가지고_있음(self, 물건=미지정):    #py:UR.carries_object
         """
         Indicates whether Reeborg carries an object or not.
 
@@ -561,11 +552,7 @@ class 사용_로봇(object):  #py:UR
         if 물건 is not None:
             return RUR._UR.carries_object_(self.body, 물건)
         else:
-            ans = RUR._UR.carries_object_(self.body)
-            if ans:
-                return dict(ans)
-            else:
-                return 0
+            return dict(ans) if (ans := RUR._UR.carries_object_(self.body)) else 0
 
     def 바닥_색상(self):    #py:color_here
         '''Returns the value of the color found at Reeborg's location'''
@@ -589,7 +576,7 @@ class 사용_로봇(object):  #py:UR
         """Move forward, by one grid position."""
         RUR._UR.move_(self.body)
 
-    def 바닥에_물건이_있음(self, 물건=미지정):  #py:UR.object_here
+    def 바닥에_물건이_있음(self, 물건=미지정):    #py:UR.object_here
         """
         Indicates whether any type of objects are present at Reeborg's location.
 
@@ -618,10 +605,7 @@ class 사용_로봇(object):  #py:UR
             ans = RUR._UR.object_here_(self.body, 물건)
         else:
             ans = RUR._UR.object_here_(self.body)
-        if ans:
-            return list(ans)
-        else:
-            return []
+        return list(ans) if ans else []
 
 
     def 바닥_색칠(self, 색상):

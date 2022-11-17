@@ -111,7 +111,7 @@ def main(port, host):
     server_address = ('', port)
 
     # different URL forces the browser to load a fresh version of the file
-    prevent_cache = "?" + str(datetime.datetime.now())
+    prevent_cache = f"?{str(datetime.datetime.now())}"
 
     if ARGS.firefox:
         webbrowser.register('firefox',
@@ -142,10 +142,15 @@ if __name__ == "__main__":
     parser.add_argument("--offline", help="Runs completely local version " +
             "which is useful if there is no internet connection""",
             action="store_true")
-    parser.add_argument("--no_button",
-            help="Do not add stop_server button.\n" +
-            "Use %sstop_server as URL to stop the server" % raw_host % port,
-            action="store_true")
+    parser.add_argument(
+        "--no_button",
+        help=(
+            "Do not add stop_server button.\n"
+            + f"Use {raw_host}stop_server as URL to stop the server" % port
+        ),
+        action="store_true",
+    )
+
     parser.add_argument("--port", help="local port to use; default=%d" % port,
             type=int, default=port)
     parser.add_argument("--firefox", help="Opens in Firefox on my Windows computer",
@@ -157,6 +162,6 @@ if __name__ == "__main__":
     if ARGS.offline:
         FILENAME = "reeborg_offline.html"
     if ARGS.no_button:
-        print("Use %s/stop_server as URL to stop the server" % host)
+        print(f"Use {host}/stop_server as URL to stop the server")
 
     main(ARGS.port, host)

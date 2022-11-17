@@ -35,12 +35,11 @@ def dir_py(obj, exclude=None):
     out = []
     for attr in dir(obj):
         try:
-            if exclude:
-                if attr in exclude:
-                    continue
+            if exclude and attr in exclude:
+                continue
             if not attr.startswith("__"):
                 if callable(getattr(obj, attr)):
-                    out.append(attr + "()")
+                    out.append(f"{attr}()")
                 else:
                     out.append(attr)
         except AttributeError:  # javascript extension, as in supplant()
@@ -204,9 +203,7 @@ __previous_watch_values = {}
 def print_dir(obj):
     """print_dir(obj): prints public attributes of "obj", one per line.
     """
-    out = []
-    for item in dir(obj):
-        out.append(item)
+    out = list(dir(obj))
     print("\n".join(out))  # avoid creating frames for each line.
 
 
@@ -233,26 +230,24 @@ def __watch(default, loc=None, gl=None):
     for arg in loc:
         if arg in default or arg in ignore:
             continue
-        else:
-            if no_new_local:
-                no_new_local = False
-                out.append(__watch_title % window.RUR.translate("Local variables"))
-            value = __html_escape(loc[arg])
-            current_watch_values[arg] = value
+        if no_new_local:
+            no_new_local = False
+            out.append(__watch_title % window.RUR.translate("Local variables"))
+        value = __html_escape(loc[arg])
+        current_watch_values[arg] = value
         __append_watch(arg, value, out)
 
     no_new_global = True
     for arg in gl:
         if arg in default or arg in ignore:
             continue
-        else:
-            if no_new_global:
-                no_new_global = False
-                if not no_new_local:
-                    out.append("")
-                out.append(__watch_title % window.RUR.translate("Global variables"))
-            value = __html_escape(gl[arg])
-            current_watch_values[arg] = value
+        if no_new_global:
+            no_new_global = False
+            if not no_new_local:
+                out.append("")
+            out.append(__watch_title % window.RUR.translate("Global variables"))
+        value = __html_escape(gl[arg])
+        current_watch_values[arg] = value
         __append_watch(arg, value, out)
 
     no_new_expr = True
@@ -309,9 +304,9 @@ def __help(obj=None):
         __default_help()
         return
     try:
-        out.append("<h2>{}</h2>".format(obj.__name__))
+        out.append(f"<h2>{obj.__name__}</h2>")
         if hasattr(obj, "__doc__"):
-            doc = "<pre>{}</pre>".format(str(obj.__doc__))
+            doc = f"<pre>{str(obj.__doc__)}</pre>"
             out.append(doc)
         else:
             out.append("<p>No docstring found.</p>")
@@ -322,11 +317,13 @@ def __help(obj=None):
         if attr == "__class__" or attr.startswith("__"):
             continue
         try:
-            if hasattr(getattr(obj, attr), "__doc__"):
-                if getattr(obj, attr).__doc__:
-                    out.append("<h3>{}</h3>".format(attr))
-                    doc = "<pre>{}</pre>".format(getattr(obj, attr).__doc__)
-                    out.append(doc)
+            if (
+                hasattr(getattr(obj, attr), "__doc__")
+                and getattr(obj, attr).__doc__
+            ):
+                out.append(f"<h3>{attr}</h3>")
+                doc = f"<pre>{getattr(obj, attr).__doc__}</pre>"
+                out.append(doc)
         except AttributeError:
             pass
     if not out:
@@ -380,13 +377,14 @@ def __generic_translate_python(
         if mod in sys.modules:
             del sys.modules[mod]
 
-    globals_ = {}
-    globals_["__help"] = __help
-    globals_["__watch"] = __watch
-    globals_["__previous_watch_values"] = {}
-    globals_["window"] = window
-    globals_["console"] = console
-    globals_["print_dir"] = print_dir
+    globals_ = {
+        "__help": __help,
+        "__watch": __watch,
+        "__previous_watch_values": {},
+        "window": window,
+        "console": console,
+        "print_dir": print_dir,
+    }
 
     src = transform(src)
     # sometimes, when copying from documentation displayed in the browsers
@@ -402,7 +400,7 @@ def __generic_translate_python(
     # cached version of a previous import  while ensuring that and
     # global ("window") definition is done properly.
     if window.RUR.from_import == "from reeborg_en import *":
-        globals_.update(__REEBORG_EN)
+        globals_ |= __REEBORG_EN
     elif window.RUR.from_import == "from reeborg_fr import *":
         globals_.update(__REEBORG_FR)
     elif window.RUR.from_import == "from reeborg_ko import *":
@@ -414,7 +412,7 @@ def __generic_translate_python(
     elif window.RUR.from_import == "from reeborg_de import *":
         globals_.update(__REEBORG_DE)
     else:
-        raise Exception("unknown import %s" % window.RUR.from_import)
+        raise Exception(f"unknown import {window.RUR.from_import}")
 
     if highlight or var_watch:
         try:

@@ -88,16 +88,20 @@ def make_qunit_version(infile, outfile):
     with open(infile, 'r') as f:
         lines = f.readlines()
 
-    with open("tests/integration_tests/" + outfile, 'w') as f:
+    with open(f"tests/integration_tests/{outfile}", 'w') as f:
         for line in lines:
             if '</head>' in line:
                 line = qunit_css
             elif '<body>' in line:
                 line = qunit_body_addition
-            elif "src/" in line and not "brython" in line:
+            elif "src/" in line and "brython" not in line:
                 line = line.replace("src/", "../../src/")
             elif "build/" in line:
-                line = line.replace("build/reeborg.js", "../../build/reeborg.js?v=%s" % time.time())
+                line = line.replace(
+                    "build/reeborg.js",
+                    f"../../build/reeborg.js?v={time.time()}",
+                )
+
             elif "offline/" in line:
                 line = line.replace("offline/", "../../offline/")
             elif '</body>' in line:

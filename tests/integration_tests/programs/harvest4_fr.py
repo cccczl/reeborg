@@ -2,7 +2,7 @@
 pense(0)
 
 def pick_one_row(fruit):
-    for i in range(6):
+    for _ in range(6):
         while objet_ici(fruit):
             prend()
         avance()

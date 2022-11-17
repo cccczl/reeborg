@@ -37,7 +37,7 @@ def 砌墙():   #py:build_wall
     RUR._build_wall_()
 
 
-def 携带的物品(物品=无): #py:carries_object
+def 携带的物品(物品=无):    #py:carries_object
     """
     判断乐跑是否携带有某种物品。
 
@@ -62,11 +62,7 @@ def 携带的物品(物品=无): #py:carries_object
     if 物品 is not None:
         return RUR._carries_object_(物品)
     else:
-        ans = RUR._carries_object_()
-        if ans:
-            return dict(ans)
-        else:
-            return 0
+        return dict(ans) if (ans := RUR._carries_object_()) else 0
 
 def 清除打印(): #py:clear_print
     """清除之前引用“打印()”所产生的全部文字。"""
@@ -188,15 +184,8 @@ def 此处的物品(物品=无):    #py:object_here
         >>> 此处的物品("banana")
         []
     """
-    if 物品 is not None:
-        ans = RUR._object_here_(物品)
-    else:
-        ans = RUR._object_here_()
-    if ans:
-        return list(ans)    # 把 JavaScript 返回的类似列表（list）的对象
-                            # 转换成真正的 Python 列表
-    else:
-        return []
+    ans = RUR._object_here_(物品) if 物品 is not None else RUR._object_here_()
+    return list(ans) if ans else []
 
 
 def 粉刷格子(颜色):   #py:paint_square
@@ -463,7 +452,7 @@ class 机器人(object):  #py:UR
         RUR.add_robot(self.body)
 
     def __str__(self):  #py:UR.__str__
-        location = "({}, {})".format(self.body.x, self.body.y)
+        location = f"({self.body.x}, {self.body.y})"
         facing = "朝向未知"
         if self.body._orientation == RUR.EAST:
             facing = "面向东"
@@ -474,15 +463,16 @@ class 机器人(object):  #py:UR
         elif self.body._orientation == RUR.SOUTH:
             facing = "面向南"
 
-        carries = ''
-        for obj in self.body.objects:
-            if self.body.objects[obj] == 'inf':
-                carries += "\n携带乐无穷多个%s" % obj
-            else:
-                carries += '\n携带了%s个%s' % (self.body.objects[obj], obj)
+        carries = ''.join(
+            "\n携带乐无穷多个%s" % obj
+            if self.body.objects[obj] == 'inf'
+            else '\n携带了%s个%s' % (self.body.objects[obj], obj)
+            for obj in self.body.objects
+        )
+
         if not carries:
             carries = '没有携带物品'
-        return "机器人在座标{}，{}，{}.".format(location, facing, carries)
+        return f"机器人在座标{location}，{facing}，{carries}."
 
     def 到达目的地(self):    #py:UR.at_goal
         """
@@ -499,7 +489,7 @@ class 机器人(object):  #py:UR
         """
         RUR._UR.build_wall_(self.body)
 
-    def 携带的物品(self, 物品=None):  #py:UR.carries_object
+    def 携带的物品(self, 物品=None):    #py:UR.carries_object
         """
         判断乐跑是否携带有某种物品。
 
@@ -526,11 +516,7 @@ class 机器人(object):  #py:UR
         if 物品 is not None:
             return RUR._UR.carries_object_(self.body, 物品)
         else:
-            ans = RUR._UR.carries_object_(self.body)
-            if ans:
-                return dict(ans)
-            else:
-                return 0
+            return dict(ans) if (ans := RUR._UR.carries_object_(self.body)) else 0
 
     def 此处的颜色(self):    #py:color_here
         """返回乐跑所在位置的颜色值。"""
@@ -554,7 +540,7 @@ class 机器人(object):  #py:UR
         """向前移动一格。"""
         RUR._UR.move_(self.body)
 
-    def 此处的物品(self, 物品=None):  #py:UR.object_here
+    def 此处的物品(self, 物品=None):    #py:UR.object_here
         """
         判断乐跑所在的位置是否存在物品。
 
@@ -582,10 +568,7 @@ class 机器人(object):  #py:UR
             ans = RUR._UR.object_here_(self.body, 物品)
         else:
             ans = RUR._UR.object_here_(self.body)
-        if ans:
-            return list(ans)
-        else:
-            return []
+        return list(ans) if ans else []
 
 
     def 粉刷格子(self, 颜色):

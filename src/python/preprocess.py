@@ -24,13 +24,12 @@ def transform(text):
                 index = line.find(loop_keyword)
                 try:
                     n = int(stripped)
-                    line = ' '*index + 'for ' + var_names.pop() + ' in range(%s):' % n
+                    line = ' '*index + 'for ' + var_names.pop() + f' in range({n}):'
                 except:  # make sure we capture everything so as to avoid
                         # exposing weird error messages to students.
                     pass
         processed_lines.append(line)
-    result = '\n'.join(processed_lines)
-    return result
+    return '\n'.join(processed_lines)
 
 
 def get_unique_variable_names(text, nb):

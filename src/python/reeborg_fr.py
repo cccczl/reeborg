@@ -36,7 +36,7 @@ def construit_un_mur():  #py:build_wall
     RUR._build_wall_()
 
 
-def transporte(obj=None):  #py:carries_object
+def transporte(obj=None):    #py:carries_object
     """
     Indique si Reeborg transporte un ou des objets.
 
@@ -66,11 +66,7 @@ def transporte(obj=None):  #py:carries_object
     if obj is not None:
         return RUR._carries_object_(obj)
     else:
-        ans = RUR._carries_object_()
-        if ans:
-            return dict(ans)
-        else:
-            return 0
+        return dict(ans) if (ans := RUR._carries_object_()) else 0
 
 
 def efface_print():  #py:clear_print
@@ -180,7 +176,7 @@ def pas_de_surlignement():  #py:no_highlight
     RUR._no_highlight_()
 
 
-def objet_ici(obj=None):  #py:object_here
+def objet_ici(obj=None):    #py:object_here
     """
     Indique si un ou des types d'objets se trouvent à la position du robot.
 
@@ -205,15 +201,8 @@ def objet_ici(obj=None):  #py:object_here
         >>> objet_ici("fraise")
         []
     """
-    if obj is not None:
-        ans = RUR._object_here_(obj)
-    else:
-        ans = RUR._object_here_()
-
-    if ans:
-        return list(ans)
-    else:
-        return []
+    ans = RUR._object_here_(obj) if obj is not None else RUR._object_here_()
+    return list(ans) if ans else []
 
 
 def position_ici():
@@ -364,7 +353,7 @@ def couleur_de_trace(couleur):  #py:set_trace_color
     RUR._set_trace_color_(couleur)
 
 
-def style_de_trace(style="normal"):  #py:set_trace_style
+def style_de_trace(style="normal"):    #py:set_trace_style
     """
     Change le style de trace du robot.
 
@@ -386,9 +375,7 @@ def style_de_trace(style="normal"):  #py:set_trace_style
         style = "thick"
     elif style == "normal":
         style = "default"
-    elif style == "invisible":
-        pass  # leave as is
-    else:
+    elif style != "invisible":
         raise ReeborgError("Valeur de style inconnue pour style_de_trace().")
     RUR._set_trace_style_(style)
 
@@ -521,7 +508,7 @@ class RobotUsage(object):  #py:UR
         RUR.add_robot(self.body)
 
     def __str__(self):  #py:UR.__str__
-        location = "({}, {})".format(self.body.x, self.body.y)
+        location = f"({self.body.x}, {self.body.y})"
 
         if self.body._orientation == RUR.EAST:
             facing = "fait face à l'est"
@@ -532,16 +519,17 @@ class RobotUsage(object):  #py:UR
         elif self.body._orientation == RUR.SOUTH:
             facing = "fait face au sud"
 
-        carries = ''
-        for obj in self.body.objects:
-            if self.body.objects[obj] == 'inf':
-                carries += "\ntransporte un nombre infini de %s" % obj
-            else:
-                carries += '\ntransporte %s %s' % (self.body.objects[obj], obj)
+        carries = ''.join(
+            "\ntransporte un nombre infini de %s" % obj
+            if self.body.objects[obj] == 'inf'
+            else '\ntransporte %s %s' % (self.body.objects[obj], obj)
+            for obj in self.body.objects
+        )
+
         if not carries:
             carries = "ne transporte pas d'objet"
 
-        return "RobotUsage situé en {} {} {}.".format(location, facing, carries)  # NOQA
+        return f"RobotUsage situé en {location} {facing} {carries}."
 
     def au_but(self):  #py:UR.at_goal
         """
@@ -556,7 +544,7 @@ class RobotUsage(object):  #py:UR
         """Indique à Reeborg de construire un mur devant sa position."""
         RUR._UR.build_wall_(self.body)
 
-    def transporte(self, obj=None):  #py:UR.carries_object
+    def transporte(self, obj=None):    #py:UR.carries_object
         """
         Indique si Reeborg transporte un ou des objets.
 
@@ -587,11 +575,7 @@ class RobotUsage(object):  #py:UR
         if obj is not None:
             return RUR._UR.carries_object_(self.body, obj)
         else:
-            ans = RUR._UR.carries_object_(self.body)
-            if ans:
-                return dict(ans)
-            else:
-                return 0
+            return dict(ans) if (ans := RUR._UR.carries_object_(self.body)) else 0
 
     def couleur_ici(self):  #py:color_here
         '''Retourne la valeur de la couleur trouvée à la position de Reeborg.'''
@@ -614,7 +598,7 @@ class RobotUsage(object):  #py:UR
         """avance d'une case"""
         RUR._UR.move_(self.body)
 
-    def objet_ici(self, obj=None):  #py:UR.object_here
+    def objet_ici(self, obj=None):    #py:UR.object_here
         """
         Indique si un ou des types d'objets se trouvent à la position du robot.
 
@@ -645,10 +629,7 @@ class RobotUsage(object):  #py:UR
             ans = RUR._UR.object_here_(self.body, obj)
         else:
             ans = RUR._UR.object_here_(self.body)
-        if ans:
-            return list(ans)
-        else:
-            return []
+        return list(ans) if ans else []
 
     def colorie(self, couleur):  #py:paint_square
         """Colorie la case où se trouve Reeborg avec la couleur spécifiée"""

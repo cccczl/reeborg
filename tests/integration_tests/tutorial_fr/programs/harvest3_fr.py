@@ -2,7 +2,7 @@
 pense(0)
 
 def reseed_one_row():
-    for i in range(6):
+    for _ in range(6):
         while objet_ici("carrot"):
             prend()
         depose()

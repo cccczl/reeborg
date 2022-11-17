@@ -1,5 +1,6 @@
 '''A collection of useful decorators'''
 
+
 from browser import window
 from common import _import_en, _import_fr, _import_cn
 
@@ -13,7 +14,7 @@ elif human_language.endswith("cn"):
     _import_cn(globals())
     position_here = 此处的坐标
 else:
-    raise NotImplementedError("Unkown language %s" % human_language)
+    raise NotImplementedError(f"Unkown language {human_language}")
 
 
 def ensure_position_sequence(fn, path, message):

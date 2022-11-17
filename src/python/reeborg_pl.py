@@ -36,7 +36,7 @@ def wybuduj_mur():  #py:build_wall
     """Instructs Reeborg to build a wall at the location in front of itself."""
     RUR._build_wall_()
 
-def obiekt_niesiony(obj=None):  #py:carries_object
+def obiekt_niesiony(obj=None):    #py:carries_object
     """
     Indicates whether Reeborg carries an object or not.
 
@@ -63,11 +63,7 @@ def obiekt_niesiony(obj=None):  #py:carries_object
     if obj is not None:
         return RUR._carries_object_(obj)
     else:
-        ans = RUR._carries_object_()
-        if ans:
-            return dict(ans)
-        else:
-            return 0
+        return dict(ans) if (ans := RUR._carries_object_()) else 0
 
 def clear_print():  #py:clear_print
     """Erase all the text previously written using a call to print()."""
@@ -173,7 +169,7 @@ def bez_podswietlenia():  #py:no_highlight
     RUR._no_highlight_()
 
 
-def wykryto_obiekt(obj=None):  #py:object_here
+def wykryto_obiekt(obj=None):    #py:object_here
     """
     Indicates whether any type of objects are present at Reeborg's location.
 
@@ -196,14 +192,8 @@ def wykryto_obiekt(obj=None):  #py:object_here
         >>> object_here("banana")
         []
     """
-    if obj is not None:
-        ans = RUR._object_here_(obj)
-    else:
-        ans = RUR._object_here_()
-    if ans:
-        return list(ans)  # convert from JS list-like object to proper Python list
-    else:
-        return []
+    ans = RUR._object_here_(obj) if obj is not None else RUR._object_here_()
+    return list(ans) if ans else []
 
 
 def paint_square(color):  #py:paint_square
@@ -492,7 +482,7 @@ class RobotWUzyciu(object):  #py:UR
         RUR.add_robot(self.body)
 
     def __str__(self):  #py:UR.__str__
-        location = "({}, {})".format(self.body.x, self.body.y)
+        location = f"({self.body.x}, {self.body.y})"
         if self.body._orientation == RUR.EAST:
             facing = "facing East"
         elif self.body._orientation == RUR.WEST:
@@ -502,15 +492,16 @@ class RobotWUzyciu(object):  #py:UR
         elif self.body._orientation == RUR.SOUTH:
             facing = "facing South"
 
-        carries = ''
-        for obj in self.body.objects:
-            if self.body.objects[obj] == 'inf':
-                carries += "\ncarries an infinite number of %s" % obj
-            else:
-                carries += '\ncarries %s %s' % (self.body.objects[obj], obj)
+        carries = ''.join(
+            "\ncarries an infinite number of %s" % obj
+            if self.body.objects[obj] == 'inf'
+            else '\ncarries %s %s' % (self.body.objects[obj], obj)
+            for obj in self.body.objects
+        )
+
         if not carries:
             carries = 'carries no objects'
-        return "UsedRobot at {} {} {}.".format(location, facing, carries)
+        return f"UsedRobot at {location} {facing} {carries}."
 
     def u_celu(self):  #py:UR.at_goal
         """
@@ -528,7 +519,7 @@ class RobotWUzyciu(object):  #py:UR
         """
         RUR._UR.build_wall_(self.body)
 
-    def obiekt_niesiony(self, obj=None):  #py:UR.carries_object
+    def obiekt_niesiony(self, obj=None):    #py:UR.carries_object
         """
         Indicates whether Reeborg carries an object or not.
 
@@ -557,11 +548,7 @@ class RobotWUzyciu(object):  #py:UR
         if obj is not None:
             return RUR._UR.carries_object_(self.body, obj)
         else:
-            ans = RUR._UR.carries_object_(self.body)
-            if ans:
-                return dict(ans)
-            else:
-                return 0
+            return dict(ans) if (ans := RUR._UR.carries_object_(self.body)) else 0
 
     def color_here(self):  #py:color_here
         '''Returns the value of the color found at Reeborg's location'''
@@ -589,7 +576,7 @@ class RobotWUzyciu(object):  #py:UR
         """Move forward, by one grid position."""
         RUR._UR.move_(self.body)
 
-    def wykryto_obiekt(self, obj=None):  #py:UR.object_here
+    def wykryto_obiekt(self, obj=None):    #py:UR.object_here
         """
         Indicates whether any type of objects are present at Reeborg's location.
 
@@ -618,10 +605,7 @@ class RobotWUzyciu(object):  #py:UR
             ans = RUR._UR.object_here_(self.body, obj)
         else:
             ans = RUR._UR.object_here_(self.body)
-        if ans:
-            return list(ans)
-        else:
-            return []
+        return list(ans) if ans else []
 
 
     def paint_square(self, color):

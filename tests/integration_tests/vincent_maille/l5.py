@@ -55,20 +55,20 @@ def ramasse_v2() :
                     tourne_a_gauche()
             stop = stop + 1
 
-def ramasse() :
+def ramasse():
     stop = 0
-    while stop >= 0 :
+    while stop >= 0:
         avance_au_max()
         tourne = 2*(stop % 2)  +1
-        for i in range(tourne) :
+        for _ in range(tourne):
             tourne_a_gauche()
-        if mur_devant() :
+        if mur_devant():
             stop = -1
-        else :
+        else:
             avance()
-            for i in range(tourne) :
+            for _ in range(tourne):
                 tourne_a_gauche()
-            stop = stop + 1
+            stop += 1
 
 def trouve_panier() :
     while not au_but() :

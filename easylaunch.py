@@ -196,11 +196,7 @@ if __name__ == '__main__':
         create_menu(str(menu_source), reeborg_menu, lang)
 
     # We might have a custom menu included by default in the distribution
-    if Path(reeborg_menu).is_file():
-        url = "&url=%s" % menu_json
-    else:
-        url = ''
-
+    url = f"&url={menu_json}" if Path(reeborg_menu).is_file() else ''
     # Open the default web browser with the chosen initial values
     url_str = "http://localhost:{0}/reeborg_offline.html?mode={1}&lang={2}{3}"
     url = url_str.format(port, mode, lang, url)

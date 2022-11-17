@@ -53,7 +53,7 @@ class Vec2D(tuple):
             return self[0]*other[0]+ self[1]*other[1]
         return Vec2D(self[0]*other, self[1]*other)
     def __rmul__(self, other):
-        if isinstance(other, int) or isinstance(other, float):
+        if isinstance(other, (int, float)):
             return Vec2D(self[0]*other, self[1]*other)
     def __sub__(self, other):
         return Vec2D(self[0]-other[0], self[1]-other[1])
@@ -173,113 +173,99 @@ class TurtleScreenBase:
         #if not isinstance(lineitem, Turtle):
         #   return
 
-        if coordlist is not None:
-           _x0, _y0=coordlist[0]
-           _x1, _y1=coordlist[1]
+        if coordlist is None:
+            return
+        _x0, _y0=coordlist[0]
+        _x1, _y1=coordlist[1]
 
-           _dist=math.sqrt( (_x0-_x1)*(_x0-_x1) + (_y0-_y1)*(_y0-_y1) )
+        _dist=math.sqrt( (_x0-_x1)*(_x0-_x1) + (_y0-_y1)*(_y0-_y1) )
 
-           if speed is not None:
-               if speed == 0:
-                   speed = 10
-               _dist /= (speed/2)
+        if speed is not None:
+            if speed == 0:
+                speed = 10
+            _dist /= (speed/2)
 
-           _dur="%4.2fs" % (0.01*_dist)
-           if _dur == '0.00s':
-              _dur='0.1s'
-
-
-
-           #_dur="%ss" % 1
-           self._draw_pos+=1
-
-           _shape=["%s,%s" % (_x, _y) for _x,_y in lineitem.get_shapepoly()]
-
-           if 0:
-              #if lineitem.isvisible():
-              if lineitem in self._previous_turtle_attributes:
-                 _previous=self._previous_turtle_attributes[lineitem]
-                 if _previous.heading() != lineitem.heading():
-                 #if self._turtle_heading[lineitem] != lineitem.heading():
-
-                    _rotate=_previous.heading()
-                    _turtle=_svg.polygon(points=" ".join(_shape),
-                                   transform="rotate(%s)" % (_rotate-90),
-                                   style={'stroke': fill, 'fill': fill,
-                                          'stroke-width': width, 'display': 'none'})
-
-                    # we need to rotate our turtle..
-                    _turtle <= _svg.animateTransform(
-                                                     Id="animateLine%s" % self._draw_pos,
-                                                     attributeName="transform",
-                                                     type="rotate",
-                                                     attributeType="XML",
-                                                     From=_rotate - 90,
-                                                     to=lineitem.heading() -90,
-                                                     dur=_dur,
-                                                     begin="animateLine%s.end" % (self._draw_pos-1))
-
-                    _turtle <= _svg.set(attributeName="display",
-                                        attributeType="CSS", to="block",
-                                        begin="animateLine%s.begin" % self._draw_pos,
-                                        end="animateLine%s.end" % self._draw_pos)
-
-                    #_turtle <= _svg.animateMotion(From="%s,%s" % (_x0*self.xscale, _y0*self.yscale),
-                    #                    to="%s,%s" % (_x0*self.xscale, _y0*self.yscale),
-                    #                    begin="animateLine%s.begin" % self._draw_pos,
-                    #                    end="animateLine%s.end" % self._draw_pos)
-
-                    #_turtle <= _svg.animate(attributeName="fill",
-                    #                        From=_previous.fill, to=fill, dur=_dur,
-                    #                        begin="animateLine%s.begin" % self._draw_pos)
-
-                    self._draw_pos+=1
-                    self._canvas <= _turtle
+        _dur="%4.2fs" % (0.01*_dist)
+        if _dur == '0.00s':
+           _dur='0.1s'
 
 
-           _line= _svg.line(x1=_x0*self.xscale, y1=_y0*self.yscale,
-                            x2=_x0*self.xscale, y2=_y0*self.yscale,
-                            style={'stroke': fill, 'stroke-width': width})
 
-           _an1=_svg.animate(Id="animateLine%s" % self._draw_pos,
-                             attributeName="x2", attributeType="XML",
-                             From=_x0*self.xscale, to=_x1*self.xscale,
-                             dur=_dur, fill='freeze')
+        #_dur="%ss" % 1
+        self._draw_pos+=1
 
-           _an2=_svg.animate(attributeName="y2", attributeType="XML",
-                             begin="animateLine%s.begin" % self._draw_pos,
-                             From=_y0*self.xscale, to=_y1*self.xscale,
-                             dur=_dur, fill='freeze')
+        _shape = [f"{_x},{_y}" for _x,_y in lineitem.get_shapepoly()]
+
+        _line= _svg.line(x1=_x0*self.xscale, y1=_y0*self.yscale,
+                         x2=_x0*self.xscale, y2=_y0*self.yscale,
+                         style={'stroke': fill, 'stroke-width': width})
+
+        _an1 = _svg.animate(
+            Id=f"animateLine{self._draw_pos}",
+            attributeName="x2",
+            attributeType="XML",
+            From=_x0 * self.xscale,
+            to=_x1 * self.xscale,
+            dur=_dur,
+            fill='freeze',
+        )
+
+
+        _an2 = _svg.animate(
+            attributeName="y2",
+            attributeType="XML",
+            begin=f"animateLine{self._draw_pos}.begin",
+            From=_y0 * self.xscale,
+            to=_y1 * self.xscale,
+            dur=_dur,
+            fill='freeze',
+        )
+
 
            # draw turtle
-           if lineitem.isvisible():
-              _turtle=_svg.polygon(points=" ".join(_shape),
-                                   transform="rotate(%s)" % (lineitem.heading() - 90),
-                                   style={'stroke': fill, 'fill': fill,
-                                          'stroke-width': width, 'display': 'none'})
+        if lineitem.isvisible():
+            _turtle = _svg.polygon(
+                points=" ".join(_shape),
+                transform=f"rotate({lineitem.heading() - 90})",
+                style={
+                    'stroke': fill,
+                    'fill': fill,
+                    'stroke-width': width,
+                    'display': 'none',
+                },
+            )
 
-              _turtle <= _svg.animateMotion(From="%s,%s" % (_x0*self.xscale, _y0*self.yscale),
-                                        to="%s,%s" % (_x1*self.xscale, _y1*self.yscale),
-                                        dur=_dur, begin="animateLine%s.begin" % self._draw_pos)
 
-              _turtle <= _svg.set(attributeName="display", attributeType="CSS",
-                                to="block",
-                                begin="animateLine%s.begin" % self._draw_pos,
-                                end="animateLine%s.end" % self._draw_pos)
+            _turtle <= _svg.animateMotion(
+                From=f"{_x0 * self.xscale},{_y0 * self.yscale}",
+                to=f"{_x1 * self.xscale},{_y1 * self.yscale}",
+                dur=_dur,
+                begin=f"animateLine{self._draw_pos}.begin",
+            )
 
-              self._canvas <= _turtle
 
-           self._previous_turtle_attributes[lineitem]=lineitem
+            _turtle <= _svg.set(
+                attributeName="display",
+                attributeType="CSS",
+                to="block",
+                begin=f"animateLine{self._draw_pos}.begin",
+                end=f"animateLine{self._draw_pos}.end",
+            )
 
-           if self._draw_pos == 1:
-              _an1.setAttribute('begin', "0s")
-           else:
-              _an1.setAttribute('begin', "animateLine%s.end" % (self._draw_pos-1))
 
-           _line <= _an1
-           _line <= _an2
+            self._canvas <= _turtle
 
-           self._canvas <= _line
+        self._previous_turtle_attributes[lineitem]=lineitem
+
+        if self._draw_pos == 1:
+            _an1.setAttribute('begin', "0s")
+        else:
+            _an1.setAttribute('begin', f"animateLine{self._draw_pos - 1}.end")
+
+        _line <= _an1
+        _line <= _an2
+
+        self._canvas <= _line
 
     def _delete(self, item):
         """Delete graphics item from canvas.
@@ -325,10 +311,17 @@ class TurtleScreenBase:
         self._draw_pos+=1
         _text= _svg.text(txt, x=pos[0], y=pos[1], fill=pencolor,
                          style={'display': 'none'})
-        _text <= _svg.animate(Id="animateLine%s" % self._draw_pos,
-                              attributeName="display", attributeType="CSS",
-                              From="block", to="block", dur="1s", fill='freeze',
-                              begin="animateLine%s.end" % (self._draw_pos-1))
+        _text <= _svg.animate(
+            Id=f"animateLine{self._draw_pos}",
+            attributeName="display",
+            attributeType="CSS",
+            From="block",
+            to="block",
+            dur="1s",
+            fill='freeze',
+            begin=f"animateLine{self._draw_pos - 1}.end",
+        )
+
 
         self._canvas <= _text
         return Vec2D(pos[0]+50, pos[1]+50)  #fix me
@@ -457,14 +450,16 @@ class Shape:
             if isinstance(data, list):
                 data = tuple(data)
         elif type_ == "image":
-            if isinstance(data, str):
-                if data.lower().endswith(".gif") and isfile(data):
-                    data = TurtleScreen._image(data)
-                # else data assumed to be Photoimage
+            if (
+                isinstance(data, str)
+                and data.lower().endswith(".gif")
+                and isfile(data)
+            ):
+                data = TurtleScreen._image(data)
         elif type_ == "compound":
             data = []
         else:
-            raise TurtleGraphicsError("There is no shape type %s" % type_)
+            raise TurtleGraphicsError(f"There is no shape type {type_}")
         self._data = data
 
     def addcomponent(self, poly, fill, outline=None):
@@ -484,8 +479,7 @@ class Shape:
         >>> # .. add more components and then use register_shape()
         """
         if self._type != "compound":
-            raise TurtleGraphicsError("Cannot add component to %s Shape"
-                                                                % self._type)
+            raise TurtleGraphicsError(f"Cannot add component to {self._type} Shape")
         if outline is None:
             outline = fill
         self._data.append([poly, fill, outline])
@@ -587,7 +581,7 @@ class TurtleScreen(TurtleScreenBase):
             return self._mode
         mode = mode.lower()
         if mode not in ["standard", "logo", "world"]:
-            raise TurtleGraphicsError("No turtle-graphics-mode %s" % mode)
+            raise TurtleGraphicsError(f"No turtle-graphics-mode {mode}")
         self._mode = mode
         if mode in ["standard", "logo"]:
             self._setscrollregion(-self.canvwidth//2, -self.canvheight//2,
@@ -685,15 +679,15 @@ class TurtleScreen(TurtleScreenBase):
             if self._iscolorstring(color) or color == "":
                 return color
             else:
-                raise TurtleGraphicsError("bad color string: %s" % str(color))
+                raise TurtleGraphicsError(f"bad color string: {str(color)}")
         try:
             r, g, b = color
         except:
-            raise TurtleGraphicsError("bad color arguments: %s" % str(color))
+            raise TurtleGraphicsError(f"bad color arguments: {str(color)}")
         if self._colormode == 1.0:
             r, g, b = [round(255.0*x) for x in (r, g, b)]
         if not ((0 <= r <= 255) and (0 <= g <= 255) and (0 <= b <= 255)):
-            raise TurtleGraphicsError("bad color sequence: %s" % str(color))
+            raise TurtleGraphicsError(f"bad color sequence: {str(color)}")
         return "#%02x%02x%02x" % (r, g, b)
 
     def _color(self, cstr):
@@ -704,8 +698,8 @@ class TurtleScreen(TurtleScreenBase):
         elif len(cstr) == 4:
             cl = [16*int(cstr[h], 16) for h in cstr[1:]]
         else:
-            raise TurtleGraphicsError("bad colorstring: %s" % cstr)
-        return tuple([c * self._colormode/255 for c in cl])
+            raise TurtleGraphicsError(f"bad colorstring: {cstr}")
+        return tuple(c * self._colormode/255 for c in cl)
 
     def colormode(self, cmode=None):
         """Return the colormode or set it to 1.0 or 255.
@@ -763,10 +757,7 @@ class TurtleScreen(TurtleScreenBase):
         >>> screen.bgcolor()
         '#800080'
         """
-        if args:
-            color = self._colorstr(args)
-        else:
-            color = None
+        color = self._colorstr(args) if args else None
         color = self._bgcolor(color)
         if color is not None:
             color = self._color(color)
@@ -828,13 +819,6 @@ class TurtleScreen(TurtleScreenBase):
         """Perform a TurtleScreen update.
         """
         return
-        tracing = self._tracing
-        self._tracing = True
-        for t in self.turtles():
-            #t._update_data()
-            t._drawturtle()
-        self._tracing = tracing
-        self._update()
 
     def window_width(self):
         """ Return the width of the turtle window.
@@ -1087,10 +1071,7 @@ class TNavigator:
         """Helper function for degrees() and radians()"""
         self._fullcircle = fullcircle
         self._degreesPerAU = 360/fullcircle
-        if self._mode == "standard":
-            self._angleOffset = 0
-        else:
-            self._angleOffset = fullcircle/4.
+        self._angleOffset = 0 if self._mode == "standard" else fullcircle/4.
 
     def degrees(self, fullcircle=360.0):
         """ Set angle measurement units to degrees.
@@ -1520,7 +1501,7 @@ class TNavigator:
         else:
             self.speed(0)
         self._rotate(w2)
-        for i in range(steps):
+        for _ in range(steps):
             self.speed(speed)
             self._go(l)
             self.speed(0)
@@ -1739,19 +1720,18 @@ class TPen:
         >>> color()
         ('#285078', '#a0c8f0')
         """
-        if args:
-            l = len(args)
-            if l == 1:
-                pcolor = fcolor = args[0]
-            elif l == 2:
-                pcolor, fcolor = args
-            elif l == 3:
-                pcolor = fcolor = args
-            pcolor = self._colorstr(pcolor)
-            fcolor = self._colorstr(fcolor)
-            self.pen(pencolor=pcolor, fillcolor=fcolor)
-        else:
+        if not args:
             return self._color(self._pencolor), self._color(self._fillcolor)
+        l = len(args)
+        if l == 1:
+            pcolor = fcolor = args[0]
+        elif l == 2:
+            pcolor, fcolor = args
+        elif l == 3:
+            pcolor = fcolor = args
+        pcolor = self._colorstr(pcolor)
+        fcolor = self._colorstr(fcolor)
+        self.pen(pencolor=pcolor, fillcolor=fcolor)
 
     def pencolor(self, *args):
         """ Return or set the pencolor.
@@ -1931,31 +1911,23 @@ class TPen:
         if not (pen or pendict):
             return _pd
 
-        if isinstance(pen, dict):
-            p = pen
-        else:
-            p = {}
+        p = pen if isinstance(pen, dict) else {}
         p.update(pendict)
 
-        _p_buf = {}
-        for key in p:
-            _p_buf[key] = _pd[key]
-
+        _p_buf = {key: _pd[key] for key in p}
         if self.undobuffer:
             self.undobuffer.push(("pen", _p_buf))
 
         newLine = False
-        if "pendown" in p:
-            if self._drawing != p["pendown"]:
-                newLine = True
+        if "pendown" in p and self._drawing != p["pendown"]:
+            newLine = True
         if "pencolor" in p:
             if isinstance(p["pencolor"], tuple):
                 p["pencolor"] = self._colorstr((p["pencolor"],))
             if self._pencolor != p["pencolor"]:
                 newLine = True
-        if "pensize" in p:
-            if self._pensize != p["pensize"]:
-                newLine = True
+        if "pensize" in p and self._pensize != p["pensize"]:
+            newLine = True
         if newLine:
             self._newLine()
         if "pendown" in p:
@@ -2037,14 +2009,6 @@ class _TurtleImage:
                 screen._delete(item)
         self._type = screen._shapes[shapeIndex]._type
         return
-        #console.log(self._type)
-        if self._type == "polygon":
-            self._item = screen._createpoly()
-        elif self._type == "image":
-            self._item = screen._createimage(screen._shapes["blank"]._data)
-        elif self._type == "compound":
-            self._item = [screen._createpoly() for item in
-                                          screen._shapes[shapeIndex]._data]
         #console.log(self._item)
 
 class RawTurtle(TPen, TNavigator):
@@ -2064,16 +2028,8 @@ class RawTurtle(TPen, TNavigator):
             if canvas not in RawTurtle.screens:
                 RawTurtle.screens.append(canvas)
             self.screen = canvas
-        #elif isinstance(canvas, (ScrolledCanvas, Canvas)):
-        #    for screen in RawTurtle.screens:
-        #        if screen.cv == canvas:
-        #            self.screen = screen
-        #            break
-        #    else:
-        #        self.screen = TurtleScreen(canvas)
-        #        RawTurtle.screens.append(self.screen)
         else:
-            raise TurtleGraphicsError("bad canvas argument %s" % canvas)
+            raise TurtleGraphicsError(f"bad canvas argument {canvas}")
 
         screen = self.screen
         TNavigator.__init__(self, screen.mode())
@@ -2134,10 +2090,7 @@ class RawTurtle(TPen, TNavigator):
         Example (for a Turtle instance named turtle):
         >>> turtle.setundobuffer(42)
         """
-        if size is None:
-            self.undobuffer = None
-        else:
-            self.undobuffer = Tbuffer(size)
+        self.undobuffer = None if size is None else Tbuffer(size)
 
     def undobufferentries(self):
         """Return count of entries in the undobuffer.
@@ -2148,9 +2101,7 @@ class RawTurtle(TPen, TNavigator):
         >>> while undobufferentries():
         ...     undo()
         """
-        if self.undobuffer is None:
-            return 0
-        return self.undobuffer.nr_of_items()
+        return 0 if self.undobuffer is None else self.undobuffer.nr_of_items()
 
     def _clear(self):
         """Delete all of pen's drawings"""
@@ -2192,19 +2143,6 @@ class RawTurtle(TPen, TNavigator):
         """Perform a Turtle-data update.
         """
         return
-        screen = self.screen
-        if screen._tracing == 0:
-            return
-        elif screen._tracing == 1:
-            #self._update_data()
-            self._drawturtle()
-            #screen._update()                  # TurtleScreenBase
-            #screen._delay(screen._delayvalue) # TurtleScreenBase
-        else:
-            #self._update_data()
-            if screen._updatecounter == 0:
-                for t in screen.turtles():
-                    t._drawturtle()
                 #screen._update()
 
     def _tracer(self, flag=None, delay=None):
@@ -2242,11 +2180,11 @@ class RawTurtle(TPen, TNavigator):
         try:
             r, g, b = args
         except:
-            raise TurtleGraphicsError("bad color arguments: %s" % str(args))
+            raise TurtleGraphicsError(f"bad color arguments: {str(args)}")
         if self.screen._colormode == 1.0:
             r, g, b = [round(255.0*x) for x in (r, g, b)]
         if not ((0 <= r <= 255) and (0 <= g <= 255) and (0 <= b <= 255)):
-            raise TurtleGraphicsError("bad color sequence: %s" % str(args))
+            raise TurtleGraphicsError(f"bad color sequence: {str(args)}")
         return "#%02x%02x%02x" % (r, g, b)
 
     def shape(self, name=None):
@@ -2271,8 +2209,8 @@ class RawTurtle(TPen, TNavigator):
         """
         if name is None:
             return self.turtle.shapeIndex
-        if not name in self.screen.getshapes():
-            raise TurtleGraphicsError("There is no shape named %s" % name)
+        if name not in self.screen.getshapes():
+            raise TurtleGraphicsError(f"There is no shape named {name}")
         self.turtle._setshape(name)
         #self._update()
 
@@ -2489,7 +2427,7 @@ class RawTurtle(TPen, TNavigator):
             t11, t12, t21, t22 = l, 0, 0, l
         elif self._resizemode == "noresize":
             return polygon
-        return tuple([(t11*x + t12*y, t21*x + t22*y) for (x, y) in polygon])
+        return tuple((t11*x + t12*y, t21*x + t22*y) for (x, y) in polygon)
 
     def _drawturtle(self):
         """Manages the correct rendering of the turtle with respect to
@@ -2531,7 +2469,7 @@ class RawTurtle(TPen, TNavigator):
             screen._drawimage(stitem, self._position, tshape)
         elif ttype == "compound":
             stitem = []
-            for element in tshape:
+            for _ in tshape:
                 item = screen._createpoly()
                 stitem.append(item)
             stitem = tuple(stitem)
@@ -2614,15 +2552,14 @@ class RawTurtle(TPen, TNavigator):
         on this one.
         """
 
-        if self._speed and self.screen._tracing == 1:
-            if self._drawing:
-               #console.log('%s:%s:%s:%s:%s' % (self, start, end, self._pencolor,
-               #                                self._pensize))
-               self.screen._drawline(self,     #please remove me eventually
-                                (self._position, end),
-                                self._pencolor, self._pensize,
-                                False,
-                                self._speed)
+        if self._speed and self.screen._tracing == 1 and self._drawing:
+            #console.log('%s:%s:%s:%s:%s' % (self, start, end, self._pencolor,
+            #                                self._pensize))
+            self.screen._drawline(self,     #please remove me eventually
+                             (self._position, end),
+                             self._pencolor, self._pensize,
+                             False,
+                             self._speed)
 
         if isinstance(self._fillpath, list):
             self._fillpath.append(end)
@@ -2718,18 +2655,17 @@ class RawTurtle(TPen, TNavigator):
         >>> turtle.dot()
         >>> turtle.fd(50); turtle.dot(20, "blue"); turtle.fd(50)
         """
-        if not color:
-            if isinstance(size, (str, tuple)):
-                color = self._colorstr(size)
-                size = self._pensize + max(self._pensize, 4)
-            else:
-                color = self._pencolor
-                if not size:
-                    size = self._pensize + max(self._pensize, 4)
-        else:
+        if color:
             if size is None:
                 size = self._pensize + max(self._pensize, 4)
             color = self._colorstr(color)
+        elif isinstance(size, (str, tuple)):
+            color = self._colorstr(size)
+            size = self._pensize + max(self._pensize, 4)
+        else:
+            color = self._pencolor
+            if not size:
+                size = self._pensize + max(self._pensize, 4)
         if hasattr(self.screen, "_dot"):
             item = self.screen._dot(self._position, size, color)
             #self.items.append(item)

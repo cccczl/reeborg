@@ -16,26 +16,24 @@ def extract_first_word(mystr, separators):
     """ Splits a string into 2 parts without using regexp
         and return the first part (before a known word separator)
     """
-    for i, char in enumerate(mystr):
-        if char in separators:
-            return mystr[:i], mystr[i:]
-    return mystr, ''
+    return next(
+        (
+            (mystr[:i], mystr[i:])
+            for i, char in enumerate(mystr)
+            if char in separators
+        ),
+        (mystr, ''),
+    )
 
 
 def tracing_line(indent, current_group, last_line=False, skip_watch=False):
     '''Construct the tracing line'''
     tracecall_name = 'RUR.set_lineno_highlight'
     watch_string = "__watch(system_default_vars, loc=locals(), gl=globals())\n"
-    if _watching and not skip_watch:
-        watch_info = indent + watch_string
-    else:
-        watch_info = ''
+    watch_info = indent + watch_string if _watching and not skip_watch else ''
     if last_line:
         return watch_info
-    if _highlight:
-        trace = indent + tracecall_name + '(%s)' % current_group
-    else:
-        trace = ''
+    trace = indent + tracecall_name + f'({current_group})' if _highlight else ''
     return watch_info + trace
 
 
@@ -51,7 +49,7 @@ def replace_brackets_and_sharp(src):
                 quote = None
             elif char in ['(', ')', '[', ']', '{', '}', '#']:
                 char = ' '
-        elif char == '"' or char == "'":
+        elif char in ['"', "'"]:
             quote = char
             in_string = True
         new_src.append(char)
@@ -180,15 +178,12 @@ def insert_highlight_info(src, highlight=True, var_watch=False):
             if lineno <= current_group[-1]:  # likely inside a decorator group
                 new_lines.append(line)
                 continue
-            new_lines.append(tracing_line(indent, current_group))
-            new_lines.append(line)
+            new_lines.extend((tracing_line(indent, current_group), line))
         elif first_word in '''pass continue break if from import
                             del return raise try with yield'''.split():
-            new_lines.append(tracing_line(indent, current_group))
-            new_lines.append(line)
+            new_lines.extend((tracing_line(indent, current_group), line))
         elif first_word in 'for while'.split():
-            new_lines.append(tracing_line(indent, current_group))
-            new_lines.append(line)
+            new_lines.extend((tracing_line(indent, current_group), line))
             use_next_indent = True
             saved_lineno_group = current_group
         elif first_word in 'else except finally'.split():
@@ -200,8 +195,7 @@ def insert_highlight_info(src, highlight=True, var_watch=False):
                              tracing_line(' ', current_group, skip_watch=True) +
                              ' and' + remaining)
         elif is_assignment(line_wo_indent):
-            new_lines.append(tracing_line(indent, current_group))
-            new_lines.append(line)
+            new_lines.extend((tracing_line(indent, current_group), line))
         elif not first_word and remaining[0] == "#":
             new_lines.append(line)
         else:
